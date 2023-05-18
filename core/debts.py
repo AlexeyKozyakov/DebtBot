@@ -58,7 +58,7 @@ def calculate_total_debts(user: str):
 
 
 def calculate_debt(user: str, to_user: str):
-    debts = Debt.select().where(__is_users_debt(user, to_user))
+    debts = Debt.select().where(__is_users_debt(user, to_user) & (~Debt.is_payed))
     total = 0
     for debt in debts:
         is_incoming = debt.to_user == user
