@@ -6,7 +6,7 @@ from telegram.ext import Application, ContextTypes, filters, MessageHandler, Com
 
 import core.debts
 
-TOKEN = '6135723229:AAG3QoWuJPiD830Rw-FL1nfhGCrqV85yxiM'
+TOKEN = '6135723229:AAH4uGL69vgHa5Z2nLTYVolJehYTC2ynSlM'
 
 EXPRESSION_REGEXP = '((\d+\s*(\*|\/|\+|\-)\s*)+(\d+\s*))|\d+'
 
