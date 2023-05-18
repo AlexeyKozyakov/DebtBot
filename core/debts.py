@@ -25,6 +25,11 @@ def __is_user_debt(user: str):
     return (Debt.from_user == user) | (Debt.to_user == user)
 
 
+def __is_users_debt(first_user: str, second_user: str):
+    return (Debt.from_user == first_user) & (Debt.to_user == second_user) \
+        | (Debt.from_user == second_user) & (Debt.to_user == first_user)
+
+
 def create_debt(from_user: str, to_user: str, amount: int):
     assert from_user != to_user
     return Debt.create(from_user=from_user, to_user=to_user, amount=amount,
@@ -32,8 +37,7 @@ def create_debt(from_user: str, to_user: str, amount: int):
 
 
 def mark_debts_as_payed(first_user: str, second_user: str):
-    Debt.update(is_payed=True).where((Debt.from_user == first_user) & (Debt.to_user == second_user)
-                                     | (Debt.from_user == second_user) & (Debt.to_user == first_user)).execute()
+    Debt.update(is_payed=True).where(__is_users_debt(first_user, second_user)).execute()
 
 
 def mark_all_debts_as_payed(user: str):
@@ -50,6 +54,15 @@ def calculate_total_debts(user: str):
             total[debt_user] = 0
         total[debt_user] += -debt.amount if is_incoming else debt.amount
     total = {user: debt for user, debt in total.items() if debt != 0}
+    return total
+
+
+def calculate_debt(user: str, to_user: str):
+    debts = Debt.select().where(__is_users_debt(user, to_user))
+    total = 0
+    for debt in debts:
+        is_incoming = debt.to_user == user
+        total += -debt.amount if is_incoming else debt.amount
     return total
 
 

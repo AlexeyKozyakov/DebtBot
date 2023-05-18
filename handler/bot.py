@@ -25,6 +25,14 @@ def __get_simple_math_expression(text: str):
     return match.group()
 
 
+def __format_debt(user, amount):
+    is_incoming = amount < 0
+    if is_incoming:
+        return f'@{user} мне {-amount}. \n'
+    else:
+        return f'Я @{user} {amount}. \n'
+
+
 async def process_message(update: Update, _: ContextTypes.DEFAULT_TYPE):
     message = update.message
     user = message.from_user.username
@@ -42,7 +50,9 @@ async def process_message(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if amount <= 0:
         return
     core.debts.create_debt(from_user, to_user, amount)
-    await message.reply_text(f"долг записан: @{from_user}->@{to_user} {amount}")
+    updated_debt = core.debts.calculate_debt(user, mentioned_user)
+    await message.reply_text(f"долг записан: @{from_user}->@{to_user} {amount}\n"
+                             f"теперь: {__format_debt(mentioned_user, updated_debt)}")
 
 
 async def calculate_debts(update: Update, _: ContextTypes.DEFAULT_TYPE):
@@ -53,11 +63,7 @@ async def calculate_debts(update: Update, _: ContextTypes.DEFAULT_TYPE):
     else:
         message = ""
         for user, debt in total_debts.items():
-            is_incoming = debt < 0
-            if is_incoming:
-                message += f'@{user} мне {-debt}. \n'
-            else:
-                message += f'Я @{user} {debt}. \n'
+            message += __format_debt(user, debt)
     await update.message.reply_text(message)
 
 

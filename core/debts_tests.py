@@ -23,23 +23,23 @@ class DebtsTestCase(unittest.TestCase):
 
     @staticmethod
     def init_test_data():
-        core.debts.create_debt("sergey", "alexey", 120)
-        core.debts.create_debt("sergey", "alexey", 35)
-        core.debts.create_debt("sergey", "alexey", 228)
-        core.debts.create_debt("alexey", "sergey", 75)
-        core.debts.create_debt("alexey", "sergey", 21)
-        core.debts.create_debt("alexey", "artem", 100)
-        core.debts.create_debt("artem", "alexey", 25),
-        core.debts.create_debt("alexey", "artem", 75)
-        core.debts.create_debt("sergey", "artem", 25)
+        core.debts.create_debt('sergey', 'alexey', 120)
+        core.debts.create_debt('sergey', 'alexey', 35)
+        core.debts.create_debt('sergey', 'alexey', 228)
+        core.debts.create_debt('alexey', 'sergey', 75)
+        core.debts.create_debt('alexey', 'sergey', 21)
+        core.debts.create_debt('alexey', 'artem', 100)
+        core.debts.create_debt('artem', 'alexey', 25),
+        core.debts.create_debt('alexey', 'artem', 75)
+        core.debts.create_debt('sergey', 'artem', 25)
 
-    def test_total_debts(self):
+    def test_calculate_total_debts(self):
         self.assertEqual(
             {
                 'sergey': -287,
                 'artem': 150
             },
-            core.debts.calculate_total_debts("alexey")
+            core.debts.calculate_total_debts('alexey')
         )
 
     def test_no_zero_debts(self):
@@ -48,23 +48,29 @@ class DebtsTestCase(unittest.TestCase):
             {
                 'artem': 150
             },
-            core.debts.calculate_total_debts("alexey")
+            core.debts.calculate_total_debts('alexey')
+        )
+
+    def test_calculate_debt(self):
+        self.assertEqual(
+            -287,
+            core.debts.calculate_debt('alexey', 'sergey')
         )
 
     def test_mark_debts_as_payed(self):
-        core.debts.mark_debts_as_payed("alexey", "artem")
+        core.debts.mark_debts_as_payed('alexey', 'artem')
         self.assertEqual(
             {
                 'sergey': -287,
             },
-            core.debts.calculate_total_debts("alexey")
+            core.debts.calculate_total_debts('alexey')
         )
 
     def test_mark_all_debts_as_payed(self):
-        core.debts.mark_all_debts_as_payed("alexey")
+        core.debts.mark_all_debts_as_payed('alexey')
         self.assertEqual(
             {},
-            core.debts.calculate_total_debts("alexey")
+            core.debts.calculate_total_debts('alexey')
         )
 
     def test_get_debts(self):
@@ -86,6 +92,6 @@ class DebtsTestCase(unittest.TestCase):
                     'amount': debt.amount,
                     'payed': debt.is_payed
                 }
-                for debt in core.debts.get_all_debts("alexey")
+                for debt in core.debts.get_all_debts('alexey')
             ]
         )
