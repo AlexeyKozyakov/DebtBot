@@ -51,7 +51,8 @@ async def process_message(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return
     core.debts.create_debt(from_user, to_user, amount)
     updated_debt = core.debts.calculate_debt(user, mentioned_user)
-    updated_debt_message = 'Нет долгов' if updated_debt == 0 else __format_debt(mentioned_user, updated_debt)
+    formatted_debt = __format_debt(mentioned_user, updated_debt)
+    updated_debt_message = f'Нет долгов с @{mentioned_user}' if updated_debt == 0 else formatted_debt
     await message.reply_text(f"долг записан: @{from_user}->@{to_user} {amount}\n"
                              f"теперь: {updated_debt_message}")
 
