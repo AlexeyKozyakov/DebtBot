@@ -1,3 +1,4 @@
+import os
 import re
 
 from telegram import Update, Message
@@ -6,7 +7,7 @@ from telegram.ext import Application, ContextTypes, filters, MessageHandler, Com
 
 import core.debts
 
-TOKEN = '6135723229:AAH4uGL69vgHa5Z2nLTYVolJehYTC2ynSlM'
+TOKEN = os.getenv('DEBT_BOT_TOKEN')
 
 EXPRESSION_REGEXP = '((\d+\s*(\*|\/|\+|\-)\s*)+(\d+\s*))|\d+'
 
