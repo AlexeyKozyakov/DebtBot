@@ -26,6 +26,7 @@ def __is_user_debt(user: str):
 
 
 def create_debt(from_user: str, to_user: str, amount: int):
+    assert from_user != to_user
     return Debt.create(from_user=from_user, to_user=to_user, amount=amount,
                        created_date=datetime.datetime.now(), is_payed=False)
 
