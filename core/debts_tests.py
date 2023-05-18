@@ -10,7 +10,7 @@ MODELS = [Debt]
 test_db = SqliteDatabase(':memory:')
 
 
-class BaseTestCase(unittest.TestCase):
+class DebtsTestCase(unittest.TestCase):
     def setUp(self):
         test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
         test_db.connect()
