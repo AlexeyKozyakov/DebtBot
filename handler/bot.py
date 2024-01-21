@@ -1,15 +1,13 @@
 import os
-import re
 
 from telegram import Update, Message
 from telegram.constants import MessageEntityType
 from telegram.ext import Application, ContextTypes, filters, MessageHandler, CommandHandler
 
 import core.debts
+import parsing.parser
 
 TOKEN = os.getenv('DEBT_BOT_TOKEN')
-
-EXPRESSION_REGEXP = '((\d+\s*(\*|\/|\+|\-)\s*)+(\d+\s*))|\d+'
 
 
 def __get_first_mentioned_user(message: Message):
@@ -17,13 +15,6 @@ def __get_first_mentioned_user(message: Message):
         if entity.type == MessageEntityType.MENTION:
             return message.text[entity.offset + 1:entity.offset + entity.length]
     return None
-
-
-def __get_simple_math_expression(text: str):
-    match = re.search(EXPRESSION_REGEXP, text)
-    if match is None:
-        return match
-    return match.group()
 
 
 def __format_debt(user, amount):
@@ -37,25 +28,26 @@ def __format_debt(user, amount):
 async def process_message(update: Update, _: ContextTypes.DEFAULT_TYPE):
     message = update.message
     user = message.from_user.username
-    mentioned_user = __get_first_mentioned_user(message)
-    if mentioned_user is None:
+    debt_lines = parsing.parser.parse_debts_text(message.text)
+    if not debt_lines:
         return
-    is_incoming = 'мне' in message.text.lower()
-    debt_expression = __get_simple_math_expression(message.text)
-    if debt_expression is None:
-        return
-    amount = int(eval(debt_expression))
-    from_user, to_user = (mentioned_user, user) if is_incoming else (user, mentioned_user)
-    if from_user == to_user:
-        return
-    if amount <= 0:
-        return
-    core.debts.create_debt(from_user, to_user, amount)
-    updated_debt = core.debts.calculate_debt(user, mentioned_user)
-    formatted_debt = __format_debt(mentioned_user, updated_debt)
-    updated_debt_message = f'Нет долгов с @{mentioned_user}' if updated_debt == 0 else formatted_debt
-    await message.reply_text(f"долг записан: @{from_user}->@{to_user} {amount}\n"
-                             f"теперь: {updated_debt_message}")
+    reply = ''
+    for debt_line in debt_lines:
+        is_incoming = debt_line['is_incoming']
+        amount = debt_line['amount']
+        if amount <= 0:
+            continue
+        for debt_user in debt_line['users']:
+            from_user, to_user = (debt_user, user) if is_incoming else (user, debt_user)
+            if from_user == to_user:
+                continue
+            core.debts.create_debt(from_user, to_user, amount)
+            updated_debt = core.debts.calculate_debt(user, debt_user)
+            formatted_debt = __format_debt(debt_user, updated_debt)
+            updated_debt_message = f'Нет долгов с @{debt_user}\n' if updated_debt == 0 else formatted_debt
+            reply += f"долг записан: @{from_user}->@{to_user} {amount}\nтеперь: {updated_debt_message}\n"
+    if reply:
+        await message.reply_text(reply)
 
 
 async def calculate_debts(update: Update, _: ContextTypes.DEFAULT_TYPE):
