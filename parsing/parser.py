@@ -1,10 +1,9 @@
-import re
 from typing import Optional, TypedDict
 
 DIRECTION_INCOMING = 1
 DIRECTION_OUTGOING = 2
 
-EXPRESSION_REGEXP = '((\d+\s*(\*|\/|\+|\-)\s*)+(\d+\s*))|\d+'
+EXPRESSION_SIMBOLS = {'+', '-', '*', '/', '(', ')', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
 
 
 class DebtLine(TypedDict):
@@ -69,8 +68,21 @@ def __parse_users(words: list[str]) -> Optional[list[str]]:
 
 
 def __parse_amount(words: list[str]) -> Optional[int]:
-    text = ' '.join(words)
-    match = re.match(EXPRESSION_REGEXP, text)
-    if not match:
+    expression = __extract_expression(words)
+    if not expression:
         return None
-    return int(eval(match.group()))
+    try:
+        return int(eval(expression))
+    except SyntaxError:
+        return None
+
+
+def __extract_expression(words: list[str]) -> Optional[str]:
+    expression = ''
+    for word in words:
+        for symbol in word:
+            if symbol in EXPRESSION_SIMBOLS:
+                expression += symbol
+            else:
+                return expression
+    return expression

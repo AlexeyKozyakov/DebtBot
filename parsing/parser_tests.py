@@ -109,3 +109,61 @@ class ParserTestsCase(unittest.TestCase):
                 """
             )
         )
+
+    def test_parse_multiple_debts(self):
+        self.assertEqual(
+            [
+                {
+                    'users': ['sergey', 'artem', 'boris'],
+                    'is_incoming': False,
+                    'amount': 150
+                },
+                {
+                    'users': ['sergey', 'boris'],
+                    'is_incoming': True,
+                    'amount': 400
+                }
+            ],
+            parse_debts_text(
+                """
+                Я @sergey @artem @boris 600/4 еда
+                @sergey @boris мне 400
+                """
+            )
+        )
+
+    def test_parse_debt_with_brackets(self):
+        self.assertEqual(
+            [
+                {
+                    'users': ['sergey'],
+                    'is_incoming': False,
+                    'amount': 666
+                }
+            ],
+            parse_debts_text(
+                """
+                Я @sergey (700 + 233 + 400) / 2
+                """
+            )
+        )
+
+    def test_no_debt_with_incorrect_expression(self):
+        self.assertEqual(
+            [],
+            parse_debts_text(
+                """
+                Я @sergey (700 + 233 + 400 / 2
+                """
+            )
+        )
+
+    def test_no_debt_with_undefined_expression(self):
+        self.assertEqual(
+            [],
+            parse_debts_text(
+                """
+                Я @sergey (700 + 233 + a) / 2
+                """
+            )
+        )
