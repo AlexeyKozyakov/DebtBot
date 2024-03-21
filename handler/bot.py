@@ -19,10 +19,23 @@ def __get_first_mentioned_user(message: Message):
 
 def __format_debt(user, amount):
     is_incoming = amount < 0
+    emoji = __get_status_emoji(amount)
     if is_incoming:
-        return f'@{user} мне {-amount}. \n'
+        return f'@{user} мне {-amount}{emoji} \n'
     else:
-        return f'Я @{user} {amount}. \n'
+        return f'Я @{user} {amount}{emoji} \n'
+
+
+def __get_status_emoji(amount):
+    amount_abs = abs(amount)
+    if amount_abs >= 100000:
+        return '💎'
+    elif amount_abs >= 50000:
+        return '💰'
+    elif amount_abs >= 10000:
+        return '💵'
+    else:
+        return ''
 
 
 async def process_message(update: Update, _: ContextTypes.DEFAULT_TYPE):
